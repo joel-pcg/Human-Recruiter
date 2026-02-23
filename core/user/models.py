@@ -43,8 +43,8 @@ class User(AbstractUser):
             request = get_current_request()
             groups = self.groups.all()
             if groups.exists():
-                if 'group' not in request.session:
-                    request.session['group'] = groups[0]
+                if 'group_id' not in request.session:
+                    request.session['group_id'] = groups[0].id
         except Exception:
             logger.exception("Error setting group session for user %s", self.username)
 

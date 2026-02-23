@@ -20,9 +20,6 @@ class UserListView(LoginRequiredMixin,ValidatePermissionRequiredMixin, ListView)
     template_name = 'user/list.html'
     permission_required = 'view_user'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request):
         data = {}
         try:
@@ -56,10 +53,6 @@ class UserCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,CreateVi
     template_name = 'user/create.html'
     success_url = reverse_lazy('user:user_list')
     permission_required = 'add_user'
-
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, **kwargs):
         data = {}
@@ -143,7 +136,8 @@ class UserDeleteView(LoginRequiredMixin,ValidatePermissionRequiredMixin,DeleteVi
 class UserChangeGroup(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
-            request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
+            group = Group.objects.get(pk=self.kwargs['pk'])
+            request.session['group_id'] = group.id
         except Exception:
             logger.exception("Error changing group to pk=%s", self.kwargs['pk'])
         return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
