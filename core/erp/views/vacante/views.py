@@ -1,6 +1,9 @@
 import json
+import logging
 from datetime import date
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -178,7 +181,7 @@ class ApplyVacants(CreateView):
                     form.save()
                     return  redirect('erp:page_thanks')
                 else:
-                    print(form.errors)
+                    logger.warning("Form errors in ApplyVacants: %s", form.errors)
                     data['error'] = 'Formulario no válido.'
         except Exception as e:
             data['error'] = str(e)

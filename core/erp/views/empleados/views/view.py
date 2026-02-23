@@ -1,7 +1,10 @@
 import json
+import logging
 from decimal import Decimal
 import datetime
 from datetime import date
+
+logger = logging.getLogger(__name__)
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
@@ -190,7 +193,7 @@ class EmpleadoInformeView(View):
             # response['Content-Disposition'] = 'attachment; filename="Informe_personal_de_empleado.pdf"'
             return response
         except Exception as e:
-            print(e)
+            logger.exception("Error generating employee report")
         return HttpResponseRedirect(reverse_lazy('erp:empleados_list'))
 
 

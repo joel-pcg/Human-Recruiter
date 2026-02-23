@@ -1,3 +1,4 @@
+import logging
 import uuid
 from core.erp.models import Employee
 from crum import get_current_request
@@ -5,6 +6,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.forms import model_to_dict
 from config.settings import MEDIA_URL, STATIC_URL
+
+logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
@@ -38,11 +41,11 @@ class User(AbstractUser):
     def get_group_session(self):
         try:
             request = get_current_request()
-            group = self.groups.all()
-            if group.exists():
+            groups = self.groups.all()
+            if groups.exists():
                 if 'group' not in request.session:
-                    request.session['group'] = group[0]
-        except:
-            pass
+                    request.session['group'] = groups[0]
+        except Exception:
+            logger.exception("Error setting group session for user %s", self.username)
 
     

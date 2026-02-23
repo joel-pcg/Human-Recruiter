@@ -1,8 +1,11 @@
 import json
+import logging
 from datetime import date
 from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
+
+logger = logging.getLogger(__name__)
 
 # import openpyxl
 import xlsxwriter
@@ -195,7 +198,7 @@ class SalaryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Crea
                 employees = Employee.objects.filter(estado='Contratado')
                 if len(employees_ids):
                     employees = employees.filter(id__in=employees_ids)
-                    print(f'EMPLEADOS DICT: {employees}')
+                    logger.debug("Filtering employees: %s", employees_ids)
                 columns = [{'data': 'employees.person.first_name'}]
 
                 headings = Headings.objects.filter(state=True)

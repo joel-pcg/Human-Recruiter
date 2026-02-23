@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import *
 from decimal import Decimal
 from io import BytesIO
@@ -12,6 +13,8 @@ from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class AssistanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, FormView):
@@ -70,15 +73,14 @@ class AssistanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Fo
                 workbook.close()
                 output.seek(0)
                 response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                print(response)
                 response[
                     'Content-Disposition'] = f"attachment; filename='ASISTENCIAS_{datetime.datetime.now().date().strftime('%d_%m_%Y')}.xlsx'"
                 return response
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
+            logger.exception("Error in AssistanceListView")
             data['error'] = str(e)
-            print(data['error'])
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 

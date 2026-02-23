@@ -1,22 +1,19 @@
 import json
+import logging
 
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View, FormView
 
 from config import settings
 from core.user.forms import UserForm, UserProfileForm
-
 from core.user.models import User
 from core.erp.mixins import *
 
-
-# Create your views here.
+logger = logging.getLogger(__name__)
 
 class UserListView(LoginRequiredMixin,ValidatePermissionRequiredMixin, ListView):
     model = User
@@ -37,7 +34,7 @@ class UserListView(LoginRequiredMixin,ValidatePermissionRequiredMixin, ListView)
                     if item is not None:
                         data.append(item)
                     else:
-                        print(f"El usuario con ID {i.id} no tiene datos JSON válidos.")
+                        logger.warning("El usuario con ID %s no tiene datos JSON validos.", i.id)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -147,8 +144,8 @@ class UserChangeGroup(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
-        except:
-            pass
+        except Exception:
+            logger.exception("Error changing group to pk=%s", self.kwargs['pk'])
         return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
 
