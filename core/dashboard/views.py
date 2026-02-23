@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 from core.erp.models import *
 from django.utils import timezone
-from core.erp.views.Vacations.views import send_email_vacation_finished, send_reminder_vacation_ending
+from core.erp.services.email_service import send_vacation_finished_email, send_vacation_reminder_email
 
 # Create your views here.
 
@@ -22,14 +22,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             vacations_to_remind = Vacations.objects.filter(end_date=tomorrow, state_vacations='Acceptada')
             for vacations in vacations_to_remind:
                 if  not vacations.reminder_sent:
-                    send_reminder_vacation_ending(vacations)
+                    send_vacation_reminder_email(vacations)
                     vacations.reminder_sent = True
                     vacations.save()
             for vacations in vacations_to_complete:
                 if vacations.state_vacations != 'Finalizada':
                     vacations.state_vacations = 'Finalizada'
                     vacations.save()
-                    send_email_vacation_finished(vacations)
+                    send_vacation_finished_email(vacations)
                 employee = vacations.empleado
                 if vacations.end_date == today:
                     employee.estado = 'Contratado'

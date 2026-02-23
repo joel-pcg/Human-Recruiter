@@ -276,30 +276,9 @@ class Employee(models.Model):
         # ordering = [id]
 
 
-# Envio de correo
-def send_hiring_notification(employee):
-    try:
-        mailServer = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-        mailServer.ehlo()
-        mailServer.starttls()
-        mailServer.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-        email_to = employee.person.email
-        messages = MIMEMultipart()
-        messages['From'] = settings.EMAIL_HOST_USER
-        messages['To'] = email_to
-        messages['Subject'] = "¡Felicidades, ha sido contratado!"
-        content = render_to_string('email/hiring_notification.html', {'employee': employee})
-        messages.attach(MIMEText(content, 'html'))
-        mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
-    except Exception as e:
-        print(f"Error al enviar el correo de notificación de contratación: {str(e)}")
-
-
-# Notificar que fue contratado al empleado
 def email_hiring(sender, instance, created, **kwargs):
-    if created:
-        send_hiring_notification(instance)
-    if instance.estado == 'Contratado':
+    if created and instance.estado == 'Contratado':
+        from core.erp.services.email_service import send_hiring_notification
         send_hiring_notification(instance)
 
 

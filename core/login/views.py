@@ -1,18 +1,13 @@
-import smtplib
 import uuid
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 from django.contrib.auth import logout, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import LoginView
 from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import redirect
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView, FormView
 import config.settings as setting
 from config import settings
+from core.erp.services.email_service import send_password_reset_email
 from core.user.models import User
 from .form import ResetPasswordForm, ChangePasswordForm
 from ..security.models import AccessUser
@@ -61,25 +56,13 @@ class LoginResetPasswordView(FormView):
             url = settings.DOMAIN if not setting.DEBUG else self.request.META['HTTP_HOST']
             user.token = uuid.uuid4()
             user.save()
-            mailServer = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-            mailServer.ehlo()
-            mailServer.starttls()
-            mailServer.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-            email_to = user.employee.person.email
-            messages = MIMEMultipart("""Este es el mensaje de las narices""")
-            messages['From'] = settings.EMAIL_HOST_USER
-            messages['To'] = email_to
-            messages['Subject'] = "Solicitud de cambio de contraseña"
-            content = render_to_string('login/send_email.html', {
-                'user': user,
-                'link_resetpwd': f'http://{url}/login/change/password/{str(user.token)}/',
-                'link_home': f'http://{url}'
-            })
-            messages.attach(MIMEText(content, 'html'))
-            mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
+            reset_link = f'http://{url}/login/change/password/{str(user.token)}/'
+            home_link = f'http://{url}'
+            send_password_reset_email(user, reset_link, home_link)
         except Exception as e:
             data['error'] = str(e)
         return data
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:

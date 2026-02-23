@@ -111,48 +111,7 @@ class VacationsUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
         return context
 
 
-def send_email_vacation_finished(vacations):
-    try:
-        mailServer = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-        mailServer.ehlo()
-        mailServer.starttls()
-        mailServer.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-        email_to = vacations.empleado.person.email
-        messages = MIMEMultipart()
-        messages['From'] = settings.EMAIL_HOST_USER
-        messages['To'] = email_to
-        messages['Subject'] = "Recordatorio: Vacaciones Finalizadas"
-
-        # Personaliza el mensaje
-        content = render_to_string('Vacations/vacation_finished.html', {'vacations': vacations})
-
-        messages.attach(MIMEText(content, 'html'))
-        mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
-    except Exception as e:
-        # Manejar cualquier error que pueda ocurrir al enviar el correo
-        print(f"Error al enviar el correo: {str(e)}")
-
-
-def send_reminder_vacation_ending(vacations):
-    try:
-        mailServer = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-        mailServer.ehlo()
-        mailServer.starttls()
-        mailServer.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-        email_to = vacations.empleado.person.email
-        messages = MIMEMultipart()
-        messages['From'] = settings.EMAIL_HOST_USER
-        messages['To'] = email_to
-        messages['Subject'] = "Recordatorio: Vacaciones tus finalizan mañana"
-        content = render_to_string('Vacations/vacation_reminder.html', {'vacations': vacations})
-        messages.attach(MIMEText(content, 'html'))
-        mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
-
-    except Exception as e:
-        print(f"Error al enviar el correo de recordatorio: {str(e)}")
-
-
-def generate_pdf_report(request,pk):
+def generate_pdf_report(request, pk):
     empleado = Employee.objects.get(id=pk)
     vacations = Vacations.objects.filter(empleado=empleado)
     company = Company.objects.first()
