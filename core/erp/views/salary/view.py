@@ -13,18 +13,10 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import *
+from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import SalaryForm
 from core.erp.models import Salary, SalaryDetail, Employee, Headings, SalaryHeadings
 from core.erp.mixins import *
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        if isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        return super().default(obj)
 
 
 class SalaryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, FormView):

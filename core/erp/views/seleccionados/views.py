@@ -7,19 +7,11 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
+from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import *
 from core.erp.models import *
 from core.erp.mixins import *
 from django.core.paginator import Paginator
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        if isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        return super().default(obj)
 
 
 class SelectListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, TemplateView):

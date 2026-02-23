@@ -4,17 +4,10 @@ from datetime import date
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
+from core.erp.encoders import CustomJSONEncoder
 from core.erp.mixins import *
 from core.erp.forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        if isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        return super().default(obj)
 
 
 class DescuentosListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,TemplateView):

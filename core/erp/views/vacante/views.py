@@ -9,18 +9,10 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic import *
 
+from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
-
-
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        if isinstance(obj, date):
-            return obj.strftime('%Y-%m-%d')
-        return super().default(obj)
 
 
 class VacantsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):

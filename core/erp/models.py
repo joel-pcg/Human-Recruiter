@@ -8,11 +8,7 @@ from django.forms import model_to_dict
 from django.utils import timezone
 from config import settings
 from core.erp.choice import *
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from django.template.loader import render_to_string
-from config import settings
+from core.erp.formatting import format_as_dominican_currency
 
 
 def generate_employee_code():
@@ -261,9 +257,7 @@ class Employee(models.Model):
                                                 assistance__date_joined__month=month, state=True).count()
 
     def format_salary_as_dominican_currency(self):
-        salary_str = f'{self.salary:,.2f}'
-        # salary_str = salary_str.replace(",", "x").replace(".", ",").replace("x", ".")
-        return salary_str
+        return format_as_dominican_currency(self.salary)
 
     def toJSON(self):
         item = model_to_dict(self)
@@ -395,18 +389,14 @@ class SalaryDetail(models.Model):
     def format_decimal(self, valor):
         return '{:,}'.format(round(valor)).replace(',', '.')
 
-    def format_salary_as_dominican_currency(self, valor):
-        salary_str = f'{valor:,.2f}'
-        return salary_str
-
     def get_income_format(self):
-        return self.format_salary_as_dominican_currency(self.income)
+        return format_as_dominican_currency(self.income)
 
     def get_expenses_format(self):
-        return self.format_salary_as_dominican_currency(self.expenses)
+        return format_as_dominican_currency(self.expenses)
 
     def get_total_amount_format(self):
-        return f'{self.format_salary_as_dominican_currency(self.total_amount)}'
+        return format_as_dominican_currency(self.total_amount)
 
     def toJSON(self):
         item = model_to_dict(self)
@@ -439,13 +429,8 @@ class SalaryHeadings(models.Model):
     # def format_decimal(self, valor):
     #     return '{:,}'.format(round(valor)).replace(',', '.')
 
-    @staticmethod
-    def format_salary_as_dominican_currency(valor):
-        salary_str = f'{valor:,.2f}'
-        return salary_str
-
     def get_valor_format(self):
-        return self.format_salary_as_dominican_currency(self.valor)
+        return format_as_dominican_currency(self.valor)
 
     def toJSON(self):
         item = model_to_dict(self, exclude=['salary'])
