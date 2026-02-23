@@ -3,44 +3,22 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum, FloatField
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 from core.erp.models import *
-from django.utils import timezone
-from core.erp.services.email_service import send_vacation_finished_email, send_vacation_reminder_email
+from core.erp.services.vacation_service import process_vacation_transitions
 
-# Create your views here.
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            today = timezone.now().date()
-            tomorrow = today + datetime.timedelta(days=1)
-            vacations_to_complete = Vacations.objects.filter(end_date=today)
-            vacations_to_remind = Vacations.objects.filter(end_date=tomorrow, state_vacations='Acceptada')
-            for vacations in vacations_to_remind:
-                if  not vacations.reminder_sent:
-                    send_vacation_reminder_email(vacations)
-                    vacations.reminder_sent = True
-                    vacations.save()
-            for vacations in vacations_to_complete:
-                if vacations.state_vacations != 'Finalizada':
-                    vacations.state_vacations = 'Finalizada'
-                    vacations.save()
-                    send_vacation_finished_email(vacations)
-                employee = vacations.empleado
-                if vacations.end_date == today:
-                    employee.estado = 'Contratado'
-                    employee.save()
-                
+            process_vacation_transitions()
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         request.user.get_group_session()
-        # 
-        # print('se envio')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):

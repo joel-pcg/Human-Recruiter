@@ -18,7 +18,7 @@ from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import *
 from core.erp.models import *
 from core.erp.mixins import *
-from django.core.paginator import Paginator
+from core.erp.services.employee_service import search_employees, deactivate_employee, activate_employee
 
 
 class EmpleadoListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
@@ -32,60 +32,13 @@ class EmpleadoListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
             action = request.POST['action']
             if action == 'searchdata':
                 search_value = request.POST.get('search[value]', '')
-                employees = Employee.objects.annotate(
-                    full_name=Concat('person__firstname', Value(' '), 'person__lastname')
-                ).filter(
-                    Q(id__icontains=search_value) |
-                    Q(hiring_date__icontains=search_value) |
-                    Q(codigo__icontains=search_value) |
-                    Q(full_name__icontains=search_value) |  # Búsqueda por nombre completo usando el método get_full_name
-                    Q(department__name__icontains=search_value) |
-                    Q(position__name__icontains=search_value) |
-                    Q(turn__name__icontains=search_value) |
-                    Q(salary__icontains=search_value) |
-                    Q(estado__icontains=search_value)
-                ).order_by('id')
-
-                e = Employee.objects.all().count()
-
-                paginator = Paginator(employees, request.POST.get('length', e))
                 start = int(request.POST.get('start', 0))
                 length = int(request.POST.get('length', 10))
-                page_number = start // length + 1
-                page = paginator.get_page(page_number)
-
-                data = {
-                    'data': [
-                        {
-                            'id': employee.id,
-                            'hiring_date': employee.hiring_date.strftime('%Y-%m-%d'),
-                            'codigo': employee.codigo,
-                            'full_name': employee.get_full_name(),
-                            'department__name': employee.department.name,
-                            'position__name': employee.position.name,
-                            'turn__name': employee.turn.name,
-                            'salary': employee.format_salary_as_dominican_currency(),
-                            'estado': employee.estado,
-                        }
-                        for employee in page
-                    ],
-                    'recordsTotal': employees.count(),
-                    'recordsFiltered': paginator.count,
-                }
+                data = search_employees(search_value, start, length)
             elif action == 'deactive':
-                employe = Employee.objects.get(pk=request.POST['id'])
-                if employe.estado == 'Contratado' or employe.estado == 'Vacaciones' or employe.estado == 'Licencia':
-                    employe.estado = 'Despedido'
-                    employe.save()
-                else:
-                    employe.save()
+                deactivate_employee(request.POST['id'])
             elif action == 'active':
-                employe = Employee.objects.get(pk=request.POST['id'])
-                if employe.estado == 'Despedido'or employe.estado == 'Vacaciones' or employe.estado == 'Licencia':
-                    employe.estado = 'Contratado'  # Contratado
-                    employe.save()
-                else:
-                    employe.save()
+                activate_employee(request.POST['id'])
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
