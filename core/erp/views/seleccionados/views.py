@@ -19,9 +19,6 @@ class SelectListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Templa
     template_name = 'seleccionados/list.html'
     permission_required = 'view_selection'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:

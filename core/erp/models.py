@@ -18,9 +18,6 @@ def generate_employee_code():
     return code
 
 
-employe_code = generate_employee_code()
-
-
 class Company(models.Model):
     name = models.CharField(max_length=25, verbose_name='Razón Social')
     rnc = models.CharField(max_length=9, verbose_name='RNC')
@@ -107,9 +104,6 @@ class Candidatos(models.Model):
         # ordering = [id]
 
 
-# self.min_salary, '.2f'
-
-
 class Departments(models.Model):
     name = models.CharField(max_length=302)
     description = models.CharField(max_length=512, null=True, blank=True)
@@ -176,9 +170,6 @@ class Selection(models.Model):
     vacants = models.ForeignKey(Vacants, on_delete=models.CASCADE, verbose_name='Vacantes')
 
     def __str__(self):
-        return f'{self.person.firstname} {self.person.lastname}'
-
-    def get_full_name(self):
         return f'{self.person.firstname} {self.person.lastname}'
 
     def get_full_name(self):
@@ -405,9 +396,6 @@ class SalaryHeadings(models.Model):
             return self.cant
         return ' '
 
-    # def format_decimal(self, valor):
-    #     return '{:,}'.format(round(valor)).replace(',', '.')
-
     def get_valor_format(self):
         return format_as_dominican_currency(self.valor)
 
@@ -511,22 +499,3 @@ class Vacations(models.Model):
     class Meta:
         verbose_name = 'Vacacion'
         verbose_name_plural = 'Vacations'
-
-# def change_state_employe(sender, instance, **kwargs):
-#     if instance.state_vacations == 'Acceptada':
-#         employee = instance.empleado
-#         if employee.estado != 'Vacaciones':
-#             employee.estado = 'Vacaciones'
-#             employee.save()
-#     if datetime.date.today() >= instance.end_date:
-#         vacations_state = instance
-#         if vacations_state.state_vacations != 'Finalizada':
-#             vacations_state.state_vacations = 'Finalizada'
-#             vacations_state.save()
-
-#             employee = instance.empleado
-#             if employee.estado != 'Contratado':
-#                 employee.estado = 'Contratado'
-#                 employee.save()
-
-# post_save.connect(change_state_employe, sender=Vacations)

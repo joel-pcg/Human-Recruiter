@@ -11,8 +11,6 @@ class PositionsJobListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,Li
     model = EmployeePositions
     template_name = 'positions/list.html'
     permission_required = 'view_employeepositions'
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -43,9 +41,6 @@ class PositionsJobCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,
     template_name = 'positions/create.html'
     success_url = reverse_lazy('erp:position_list')
     permission_required = 'add_employeepositions'
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

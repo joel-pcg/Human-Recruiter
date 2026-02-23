@@ -322,7 +322,7 @@ class VacantsForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['data'] = str(e)
+            data['error'] = str(e)
         return data
 
 
@@ -363,7 +363,7 @@ class SelectionForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['data'] = str(e)
+            data['error'] = str(e)
         return data
 
 

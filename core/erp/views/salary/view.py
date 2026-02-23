@@ -32,9 +32,6 @@ class SalaryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, FormVi
         form.fields['year'].initial = datetime.now().date().year
         return form
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         action = request.POST['action']
         data = {}

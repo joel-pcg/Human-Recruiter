@@ -24,9 +24,6 @@ class VacantsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
     permission_required = 'view_vacants'
     paginate_by = 10
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -74,9 +71,6 @@ class VacantsCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
     form_class = VacantsForm
     template_name = 'vacante/create.html'
     permission_required = 'add_vacants'
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -162,9 +156,6 @@ class ApplyVacants(CreateView):
     template_name = 'vacante/apply_form.html'
     form_class = ApplicationForm
     success_url = reverse_lazy('erp:page_thanks')
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

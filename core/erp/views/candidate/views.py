@@ -14,9 +14,6 @@ class CandidateListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,ListV
     template_name = 'candidatos/list.html'
     permission_required = 'view_candidatos'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -46,8 +43,6 @@ class CandidateCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,Cre
     template_name = 'candidatos/create.html'
     success_url = reverse_lazy('erp:candidatos_list')
     permission_required = 'add_candidatos'
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

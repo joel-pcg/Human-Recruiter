@@ -12,9 +12,6 @@ class TurnJobListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,ListVie
     template_name = 'turnos_trabajo/list.html'
     permission_required = 'view_employeeturn'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -43,8 +40,6 @@ class TurnJobCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,Creat
     form_class = EmployeeTurnForm
     template_name = 'turnos_trabajo/create.html'
     permission_required = 'view_employeeturn'
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

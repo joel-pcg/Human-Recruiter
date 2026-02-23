@@ -19,9 +19,6 @@ class VacationsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Lis
     template_name = 'vacations/list.html'
     permission_required = 'view_vacations'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -53,9 +50,6 @@ class VacationsCreatView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
     form_class = VacationsForm
     template_name = 'Vacations/create.html'
     permission_required = 'add_vacations'
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

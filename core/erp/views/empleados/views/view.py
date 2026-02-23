@@ -26,9 +26,6 @@ class EmpleadoListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
     template_name = 'empleado/list.html'
     permission_required = 'view_employee'
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -111,9 +108,6 @@ class EmpleadoCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
     template_name = 'empleado/create.html'
     form_class = EmployeForm
     permission_required = 'add_employee'
-
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}

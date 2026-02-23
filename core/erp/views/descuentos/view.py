@@ -92,7 +92,7 @@ class DescuentosUpdateView(LoginRequiredMixin,UpdateView):
                 data = self.get_form().save()
             elif action == 'validate_data':
                 data = {'valid': True}
-                queryset = Headings.objects.all().include(id=self.object.id)
+                queryset = Headings.objects.all().exclude(id=self.object.id)
                 pattern = request.POST['pattern']
                 parameter = request.POST['parameter'].strip()
                 if pattern == 'name':
