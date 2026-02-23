@@ -2,8 +2,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 from core.erp.mixins import *
 from core.erp.forms import *
@@ -14,7 +12,6 @@ class TurnJobListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,ListVie
     template_name = 'turnos_trabajo/list.html'
     permission_required = 'view_employeeturn'
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

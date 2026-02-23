@@ -7,8 +7,6 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 
 from core.erp.forms import *
@@ -31,7 +29,6 @@ class VacantsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
     permission_required = 'view_vacants'
     paginate_by = 10
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

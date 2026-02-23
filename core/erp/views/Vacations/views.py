@@ -5,8 +5,6 @@ from decimal import Decimal
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import get_template
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView
 from weasyprint import HTML
 
@@ -29,7 +27,6 @@ class VacationsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Lis
     template_name = 'vacations/list.html'
     permission_required = 'view_vacations'
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

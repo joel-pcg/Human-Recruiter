@@ -6,8 +6,6 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from core.erp.forms import *
 from core.erp.models import *
@@ -29,7 +27,6 @@ class SelectListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Templa
     template_name = 'seleccionados/list.html'
     permission_required = 'view_selection'
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

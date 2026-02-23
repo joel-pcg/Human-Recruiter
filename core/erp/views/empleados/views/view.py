@@ -8,8 +8,6 @@ from django.db.models.functions import Concat
 from django.template.loader import get_template
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView, View
 from weasyprint import HTML
 
@@ -33,7 +31,6 @@ class EmpleadoListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
     template_name = 'empleado/list.html'
     permission_required = 'view_employee'
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

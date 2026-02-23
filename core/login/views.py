@@ -10,8 +10,6 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, FormView
 import config.settings as setting
 from config import settings
@@ -54,7 +52,6 @@ class LoginResetPasswordView(FormView):
     form_class = ResetPasswordForm
     success_url = reverse_lazy(setting.LOGIN_REDIRECT_URL)
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -107,7 +104,6 @@ class ChangePasswordView(FormView):
     form_class = ChangePasswordForm
     success_url = reverse_lazy(setting.LOGIN_REDIRECT_URL)
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

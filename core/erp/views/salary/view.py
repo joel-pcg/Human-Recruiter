@@ -12,8 +12,6 @@ from django.db.models import Sum, Q, DecimalField
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 from core.erp.forms import SalaryForm
 from core.erp.models import Salary, SalaryDetail, Employee, Headings, SalaryHeadings
@@ -39,7 +37,6 @@ class SalaryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, FormVi
         form.fields['year'].initial = datetime.now().date().year
         return form
 
-    @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
