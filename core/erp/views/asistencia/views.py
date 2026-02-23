@@ -1,18 +1,22 @@
 import json
 import logging
-from datetime import *
-from decimal import Decimal
 from io import BytesIO
 import datetime
-import xlsxwriter as xlsxwriter
+import xlsxwriter
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
 from django.http import HttpResponse
 from django.views.generic import *
 from core.erp.encoders import CustomJSONEncoder
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
+from core.erp.services.attendance_service import (
+    search_attendance,
+    create_attendance,
+    update_attendance,
+    generate_attendance_list_new,
+    validate_attendance_date,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +31,9 @@ class AssistanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Fo
         data = {}
         try:
             if action == 'search':
-                data = []
                 start_date = request.POST['start_date']
                 end_date = request.POST['end_date']
-                queryset = AssistanceDetail.objects.all()
-                if len(start_date) and len(end_date):
-                    queryset = queryset.filter(assistance__date_joined__range=[start_date, end_date])
-                for i in queryset.order_by('assistance__date_joined'):
-                    data.append(i.toJSON())
+                data = search_attendance(start_date, end_date)
             elif action == 'export_assistences_excel':
                 start_date = request.POST['start_date']
                 end_date = request.POST['end_date']
@@ -104,32 +103,14 @@ class AssistanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         action = request.POST['action']
         try:
             if action == 'add':
-                with transaction.atomic():
-                    date_joined = datetime.datetime.strptime(request.POST['date_joined'], '%Y-%m-%d')
-                    assistance = Assistance()
-                    assistance.date_joined = date_joined
-                    assistance.year = date_joined.year
-                    assistance.month = date_joined.month
-                    assistance.day = date_joined.day
-                    assistance.save()
-                    for i in json.loads(request.POST['assistances']):
-                        detail = AssistanceDetail()
-                        detail.assistance_id = assistance.id
-                        detail.employee_id = int(i['id'])
-                        detail.description = i['description']
-                        detail.state = i['state']
-                        detail.save()
+                create_attendance(
+                    date_str=request.POST['date_joined'],
+                    assistances_json=json.loads(request.POST['assistances']),
+                )
             elif action == 'generate_assistance':
-                data = []
-                for i in Employee.objects.filter(estado='Contratado').order_by('id'):
-                    item = i.toJSON()
-                    item['state'] = 0
-                    item['description'] = ''
-                    data.append(item)
+                data = generate_attendance_list_new()
             elif action == 'validate_data':
-                data = {
-                    'valid': not Assistance.objects.filter(date_joined=request.POST['date_joined'].strip()).exists()
-                }
+                data = {'valid': validate_attendance_date(request.POST['date_joined'])}
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
@@ -158,7 +139,6 @@ class AssistanceUpdateView(LoginRequiredMixin, FormView):
         return form
 
     def get_object(self):
-        # date_joined = datetime.datetime.now()
         queryset = Assistance.objects.filter(date_joined=self.kwargs['date_joined'])
         if queryset.exists():
             return queryset[0]
@@ -176,37 +156,20 @@ class AssistanceUpdateView(LoginRequiredMixin, FormView):
         action = request.POST['action']
         try:
             if action == 'edit':
-                with transaction.atomic():
-                    for i in json.loads(request.POST['assistances']):
-                        if 'pk' in i:
-                            detail = AssistanceDetail.objects.get(pk=i['pk'])
-                        else:
-                            date_joined = datetime.datetime.strptime(self.kwargs['date_joined'], '%Y-%m-%d')
-                            assistance =  Assistance.objects.get_or_create(date_joined=date_joined, year=date_joined.year,
-                                                                 month=date_joined.month, day=date_joined.day)[0]
-                            detail = AssistanceDetail()
-                            detail.assistance_id = assistance.id
-                        detail.employee_id = i['id']
-                        detail.description = i['description']
-                        detail.state = i['state']
-                        detail.save()
+                update_attendance(
+                    date_str=self.kwargs['date_joined'],
+                    assistances_json=json.loads(request.POST['assistances']),
+                )
             elif action == 'generate_assistance':
-                data = []
                 date_joined = self.kwargs['date_joined']
-                for i in Employee.objects.filter(person__isnull=False):
-                    item = i.toJSON()
-                    item['state'] = 0
-                    item['description'] = ''
-                    queryset = AssistanceDetail.objects.filter(assistance__date_joined=date_joined, employee_id=i.id)
-                    if queryset.exists():
-                        assistance_detail = queryset[0]
-                        item['pk'] = assistance_detail.id
-                        item['state'] = 1 if assistance_detail.state else 0
-                        item['description'] = assistance_detail.description
-                    data.append(item)
+                data = generate_attendance_list_new(date_joined=date_joined)
             elif action == 'validate_data':
-                data = {'valid': not Assistance.objects.filter(date_joined=request.POST['date_joined']).exclude(
-                    date_joined=self.kwargs['date_joined']).exists()}
+                data = {
+                    'valid': validate_attendance_date(
+                        request.POST['date_joined'],
+                        exclude_date=self.kwargs['date_joined'],
+                    )
+                }
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
