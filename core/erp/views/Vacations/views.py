@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 from decimal import Decimal
 
@@ -11,6 +12,8 @@ from weasyprint import HTML
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -44,7 +47,8 @@ class VacationsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Lis
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacationsListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -75,7 +79,8 @@ class VacationsCreatView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacationsCreatView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -107,7 +112,8 @@ class VacationsUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, U
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacationsUpdateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -138,7 +144,7 @@ def send_email_vacation_finished(vacations):
         mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
     except Exception as e:
         # Manejar cualquier error que pueda ocurrir al enviar el correo
-        print(f"Error al enviar el correo: {str(e)}")
+        logger.error("Error al enviar el correo de vacaciones finalizadas: %s", e, exc_info=True)
 
 
 def send_reminder_vacation_ending(vacations):
@@ -157,7 +163,7 @@ def send_reminder_vacation_ending(vacations):
         mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
 
     except Exception as e:
-        print(f"Error al enviar el correo de recordatorio: {str(e)}")
+        logger.error("Error al enviar el correo de recordatorio: %s", e, exc_info=True)
 
 
 def generate_pdf_report(request,pk):

@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 from decimal import Decimal
 
@@ -12,6 +13,8 @@ from django.views.generic import *
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -59,7 +62,8 @@ class VacantsListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacantsListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -91,7 +95,8 @@ class VacantsCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cre
                 form = self.get_form()
                 data = form.save()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacantsCreateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -123,7 +128,8 @@ class VacantsUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
                 data = form.save()
 
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacantsUpdateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -150,7 +156,8 @@ class VacantsDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Del
         try:
             self.object.delete()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in VacantsDeleteView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -186,10 +193,11 @@ class ApplyVacants(CreateView):
                     form.save()
                     return  redirect('erp:page_thanks')
                 else:
-                    print(form.errors)
+                    logger.warning("Invalid form submission in ApplyVacants: %s", form.errors)
                     data['error'] = 'Formulario no válido.'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in ApplyVacants: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):

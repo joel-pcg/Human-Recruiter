@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 import datetime
 from datetime import date
@@ -15,6 +16,8 @@ from core.erp.forms import *
 from core.erp.models import *
 from core.erp.mixins import *
 from django.core.paginator import Paginator
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -97,7 +100,8 @@ class EmpleadoListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, List
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in EmpleadoListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -130,7 +134,8 @@ class EmpleadoCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Cr
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in EmpleadoCreateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -163,7 +168,8 @@ class EmpleadoUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Up
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in EmpleadoUpdateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -198,7 +204,7 @@ class EmpleadoInformeView(View):
             # response['Content-Disposition'] = 'attachment; filename="Informe_personal_de_empleado.pdf"'
             return response
         except Exception as e:
-            print(e)
+            logger.error("Error generating employee report: %s", e, exc_info=True)
         return HttpResponseRedirect(reverse_lazy('erp:empleados_list'))
 
 

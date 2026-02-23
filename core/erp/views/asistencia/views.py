@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import *
 from decimal import Decimal
 from io import BytesIO
@@ -11,6 +12,8 @@ from django.views.generic import *
 from core.erp.forms import *
 from core.erp.mixins import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -78,15 +81,15 @@ class AssistanceListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Fo
                 workbook.close()
                 output.seek(0)
                 response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                print(response)
+                logger.warning("Export assistances response: %s", response)
                 response[
                     'Content-Disposition'] = f"attachment; filename='ASISTENCIAS_{datetime.datetime.now().date().strftime('%d_%m_%Y')}.xlsx'"
                 return response
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
-            print(data['error'])
+            logger.error("Error in AssistanceListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -139,7 +142,8 @@ class AssistanceCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in AssistanceCreateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -216,7 +220,8 @@ class AssistanceUpdateView(LoginRequiredMixin, FormView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in AssistanceUpdateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -252,7 +257,8 @@ class AssistanceDeleteView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         try:
             self.get_object().delete()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in AssistanceDeleteView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 

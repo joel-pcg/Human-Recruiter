@@ -1,10 +1,10 @@
 import json
+import logging
 
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View, FormView
@@ -15,8 +15,7 @@ from core.user.forms import UserForm, UserProfileForm
 from core.user.models import User
 from core.erp.mixins import *
 
-
-# Create your views here.
+logger = logging.getLogger(__name__)
 
 class UserListView(LoginRequiredMixin,ValidatePermissionRequiredMixin, ListView):
     model = User
@@ -37,11 +36,12 @@ class UserListView(LoginRequiredMixin,ValidatePermissionRequiredMixin, ListView)
                     if item is not None:
                         data.append(item)
                     else:
-                        print(f"El usuario con ID {i.id} no tiene datos JSON válidos.")
+                        logger.warning("User ID %s has no valid JSON data", i.id)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in UserListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al procesar la solicitud.'
 
         return JsonResponse(data, safe=False)
 
@@ -73,7 +73,8 @@ class UserCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,CreateVi
                 data = form.save()
 
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error creating user: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al crear el usuario.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -105,7 +106,8 @@ class UserUpdateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,UpdateVi
                 data = form.save()
 
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error updating user: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al actualizar el usuario.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -132,7 +134,8 @@ class UserDeleteView(LoginRequiredMixin,ValidatePermissionRequiredMixin,DeleteVi
         try:
             self.object.delete()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error deleting user: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al eliminar el usuario.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -146,8 +149,10 @@ class UserDeleteView(LoginRequiredMixin,ValidatePermissionRequiredMixin,DeleteVi
 class UserChangeGroup(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
-            request.session['group'] = Group.objects.get(pk=self.kwargs['pk'])
-        except:
+            group = Group.objects.get(pk=self.kwargs['pk'])
+            if request.user.groups.filter(pk=group.pk).exists():
+                request.session['group'] = group
+        except Group.DoesNotExist:
             pass
         return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
@@ -183,7 +188,8 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error updating profile: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al actualizar el perfil.'
         return HttpResponse(json.dumps(data), content_type='application/json')
 
     def get_context_data(self, **kwargs):
@@ -223,7 +229,8 @@ class UserChangePasswordView(LoginRequiredMixin, FormView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error changing password: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error al cambiar la contraseña.'
         return HttpResponse(json.dumps(data), content_type='application/json')
 
     def get_context_data(self, **kwargs):

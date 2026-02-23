@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -6,6 +8,8 @@ from django.views.generic import UpdateView
 from core.erp.forms import CompanyForm
 from core.erp.mixins import ValidatePermissionRequiredMixin
 from core.erp.models import Company
+
+logger = logging.getLogger(__name__)
 
 
 class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
@@ -36,7 +40,8 @@ class CompanyUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Upd
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):

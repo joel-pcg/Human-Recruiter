@@ -1,5 +1,9 @@
+import logging
+
 from django.forms import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class CompanyForm(ModelForm):
@@ -37,7 +41,8 @@ class CompanyForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -84,7 +89,8 @@ class DepartmentsForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -130,7 +136,8 @@ class PositionsForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -191,7 +198,8 @@ class EmployeeTurnForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -269,7 +277,8 @@ class CandidateForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -434,7 +443,8 @@ class EmployeForm(ModelForm):
                 data['error'] = form.errors
 
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -488,7 +498,8 @@ class DescuentoForm(ModelForm):
             else:
                 data['error'] = self.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 class SalaryForm(ModelForm):
@@ -605,7 +616,8 @@ class VacationsForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 

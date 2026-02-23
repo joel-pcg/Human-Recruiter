@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 from datetime import date
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +12,8 @@ from core.erp.forms import *
 from core.erp.models import *
 from core.erp.mixins import *
 from django.core.paginator import Paginator
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -77,7 +80,8 @@ class SelectListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Templa
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -143,7 +147,8 @@ class SelectUpdateView(UpdateView):
                 form = self.get_form()
                 data = form.save()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -169,7 +174,8 @@ class SelectDeleteView(DeleteView):
         try:
             self.object.delete()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):

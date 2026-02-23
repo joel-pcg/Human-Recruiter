@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal
 from datetime import date
 from django.http import HttpResponse
@@ -7,6 +8,8 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 from core.erp.mixins import *
 from core.erp.forms import *
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -32,7 +35,8 @@ class DescuentosListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,Temp
             else:
                 data['error'] = 'No se ha seleccionado ninguna opcion'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -68,7 +72,8 @@ class DescuentosCreateView(LoginRequiredMixin,CreateView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -109,7 +114,8 @@ class DescuentosUpdateView(LoginRequiredMixin,UpdateView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -132,7 +138,8 @@ class DescuentoDeleteView(LoginRequiredMixin,DeleteView):
         try:
             self.get_object().delete()
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 

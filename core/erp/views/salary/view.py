@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 from datetime import datetime
 from decimal import Decimal
@@ -16,6 +17,8 @@ from django.views.generic import *
 from core.erp.forms import SalaryForm
 from core.erp.models import Salary, SalaryDetail, Employee, Headings, SalaryHeadings
 from core.erp.mixins import *
+
+logger = logging.getLogger(__name__)
 
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -126,7 +129,8 @@ class SalaryListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, FormVi
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in SalaryListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 
@@ -203,7 +207,7 @@ class SalaryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Crea
                 employees = Employee.objects.filter(estado='Contratado')
                 if len(employees_ids):
                     employees = employees.filter(id__in=employees_ids)
-                    print(f'EMPLEADOS DICT: {employees}')
+                    logger.warning("EMPLEADOS DICT: %s", employees)
                 columns = [{'data': 'employees.person.first_name'}]
 
                 headings = Headings.objects.filter(state=True)
@@ -257,7 +261,8 @@ class SalaryCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Crea
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in SalaryCreateView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         serialized_data = json.dumps(data, cls=CustomJSONEncoder)
         return HttpResponse(serialized_data, content_type='application/json')
 

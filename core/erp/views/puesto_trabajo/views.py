@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -5,6 +7,8 @@ from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.generic import *
 from core.erp.mixins import *
 from core.erp.forms import *
+
+logger = logging.getLogger(__name__)
 
 
 class PositionsJobListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,ListView):
@@ -25,7 +29,8 @@ class PositionsJobListView(LoginRequiredMixin,ValidatePermissionRequiredMixin,Li
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
@@ -57,7 +62,8 @@ class PositionsJobCreateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,
             else:
                 data['error'] = 'No ha ingresado a ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -90,7 +96,8 @@ class PositionsJobUpdateView(LoginRequiredMixin,ValidatePermissionRequiredMixin,
             else:
                 data['error'] = 'No ha ingresado a ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
@@ -118,7 +125,8 @@ class PositionsJobDeleteView(LoginRequiredMixin,ValidatePermissionRequiredMixin,
             self.object.delete()
 
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data)
 
     def get_context_data(self, **kwargs):

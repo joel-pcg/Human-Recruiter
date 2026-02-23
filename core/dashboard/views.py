@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum, FloatField
 from django.db.models.functions import Coalesce
@@ -8,6 +9,8 @@ from django.views.generic import TemplateView
 from core.erp.models import *
 from django.utils import timezone
 from core.erp.views.Vacations.views import send_email_vacation_finished, send_reminder_vacation_ending
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -57,7 +60,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in DashboardView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return HttpResponse(json.dumps(data), content_type='application/json')
 
     def get_context_data(self, **kwargs):

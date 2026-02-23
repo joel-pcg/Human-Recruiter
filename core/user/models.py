@@ -1,16 +1,34 @@
+import logging
 import uuid
+from datetime import timedelta
+
 from core.erp.models import Employee
 from crum import get_current_request
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.forms import model_to_dict
-from config.settings import MEDIA_URL, STATIC_URL
+from django.utils import timezone
+from config.settings import MEDIA_URL, STATIC_URL, PASSWORD_RESET_TOKEN_EXPIRY_HOURS
+
+logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
     image = models.ImageField(upload_to='users/%Y/%m/%d', null=True, blank=True)
     token = models.UUIDField(primary_key=False, editable=False, null=True, blank=True)
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Employee", unique=False,null=True)
+    token_created_at = models.DateTimeField(null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name="Employee", unique=False, null=True)
+
+    def generate_reset_token(self):
+        self.token = uuid.uuid4()
+        self.token_created_at = timezone.now()
+        self.save()
+
+    def is_token_valid(self):
+        if self.token is None or self.token_created_at is None:
+            return False
+        expiry = self.token_created_at + timedelta(hours=PASSWORD_RESET_TOKEN_EXPIRY_HOURS)
+        return timezone.now() < expiry
 
 
     def get_image(self):
@@ -42,7 +60,7 @@ class User(AbstractUser):
             if group.exists():
                 if 'group' not in request.session:
                     request.session['group'] = group[0]
-        except:
-            pass
+        except Exception:
+            logger.warning("Failed to set group session", exc_info=True)
 
     

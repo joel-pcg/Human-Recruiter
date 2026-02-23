@@ -1,9 +1,13 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from core.erp.forms import DepartmentsForm
 from core.erp.mixins import *
 from core.erp.models import *
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -40,7 +44,8 @@ class DepartamentListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, T
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error in DepartamentListView: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):

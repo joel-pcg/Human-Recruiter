@@ -1,6 +1,10 @@
+import logging
+
 from django.forms import *
 from datetime import datetime
 from core.user.models import *
+
+logger = logging.getLogger(__name__)
 
 
 class UserForm(ModelForm):
@@ -70,7 +74,8 @@ class UserForm(ModelForm):
             else:
                 data['error'] = form.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data
 
 
@@ -121,5 +126,6 @@ class UserProfileForm(ModelForm):
             else:
                 data['error'] = self.errors
         except Exception as e:
-            data['error'] = str(e)
+            logger.error("Error: %s", e, exc_info=True)
+            data['error'] = 'Ha ocurrido un error.'
         return data

@@ -1,18 +1,18 @@
 import datetime
+import logging
 import random
 import re
 import string
+from django.core.mail import send_mail
 from django.db import models
 from django.db.models.signals import post_save
 from django.forms import model_to_dict
+from django.template.loader import render_to_string
 from django.utils import timezone
 from config import settings
 from core.erp.choice import *
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from django.template.loader import render_to_string
-from config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def generate_employee_code():
@@ -185,9 +185,6 @@ class Selection(models.Model):
     def get_full_name(self):
         return f'{self.person.firstname} {self.person.lastname}'
 
-    def get_full_name(self):
-        return f'{self.person.firstname} {self.person.lastname}'
-
     def toJSON(self):
         item = model_to_dict(self)
         item['person'] = self.person.toJSON()
@@ -285,20 +282,20 @@ class Employee(models.Model):
 # Envio de correo
 def send_hiring_notification(employee):
     try:
-        mailServer = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
-        mailServer.ehlo()
-        mailServer.starttls()
-        mailServer.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
         email_to = employee.person.email
-        messages = MIMEMultipart()
-        messages['From'] = settings.EMAIL_HOST_USER
-        messages['To'] = email_to
-        messages['Subject'] = "¡Felicidades, ha sido contratado!"
+        if not email_to:
+            logger.warning("Employee %s has no email address, skipping notification", employee)
+            return
         content = render_to_string('email/hiring_notification.html', {'employee': employee})
-        messages.attach(MIMEText(content, 'html'))
-        mailServer.sendmail(settings.EMAIL_HOST_USER, email_to, messages.as_string())
+        send_mail(
+            subject="¡Felicidades, ha sido contratado!",
+            message='',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email_to],
+            html_message=content,
+        )
     except Exception as e:
-        print(f"Error al enviar el correo de notificación de contratación: {str(e)}")
+        logger.error("Error sending hiring notification email: %s", e, exc_info=True)
 
 
 # Notificar que fue contratado al empleado
